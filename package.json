@@ -24,6 +24,7 @@
     "byline": "^5.0.0",
     "dockerode": "^2.3.0",
     "js-yaml": "^3.6.1",
+    "superagent": "^2.2.0",
     "vorpal": "1.11.4"
   },
   "devDependencies": {
@@ -37,5 +38,9 @@
     "npm-run-all": "^2.3.0",
     "rimraf": "^2.5.4",
     "webpack": "^1.13.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tocttou/choreograph-cli"
   }
 }

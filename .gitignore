@@ -3,3 +3,4 @@ dist/
 npm-debug.log
 .choreo.yml
 .idea/
+payload/
