@@ -21,7 +21,8 @@
   "author": "Ashish <me@ashishchaudhary.in> (https://ashishchaudhary.in)",
   "license": "MIT",
   "dependencies": {
-    "vorpal": "^1.11.4"
+    "js-yaml": "^3.6.1",
+    "vorpal": "1.11.4"
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",
