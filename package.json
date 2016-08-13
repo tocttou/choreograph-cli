@@ -21,6 +21,8 @@
   "author": "Ashish <me@ashishchaudhary.in> (https://ashishchaudhary.in)",
   "license": "MIT",
   "dependencies": {
+    "byline": "^5.0.0",
+    "dockerode": "^2.3.0",
     "js-yaml": "^3.6.1",
     "vorpal": "1.11.4"
   },
