@@ -157,73 +157,74 @@ vcl
   });
 
 vcl
-      .command('run', 'Add a new job')
-      .help((args) => {
-        Log('This command reads .choreo.yml to add a new job');
-      })
-      .action((args, callback) => {
-        try {
-          const fileStats = fs.statSync(`${process.cwd()}/.choreo.yml`);
-          try {
-            const doc = yaml.load(fs.readFileSync(`${process.cwd()}/.choreo.yml`, 'utf-8'));
-            for (let service of Object.keys(doc)) {
-              if (service !== 'job' && service !== 'nodes') {
-                if (typeof doc[service].payload === 'object') {
-                  const objectToAdd = {};
-                  for (const filepath of doc[service].payload) {
-                    const filename = path.basename(filepath);
-                    objectToAdd[filename] = fs.readFileSync(filepath, 'utf-8');
-                  }
-                  doc[service].payload = objectToAdd;
-                }
-                if (typeof doc[service].exec !== 'undefined') {
-                  for (const execType of Object.keys(doc[service].exec)) {
-                    if (execType !== 'bash') {
-                      if (typeof doc[service].exec[execType] === 'object') {
-                        const objectToAdd = {};
-                        for (const filepath of doc[service].exec[execType]) {
-                          const filename = path.basename(filepath);
-                          objectToAdd[filename] = fs.readFileSync(filepath, 'utf-8');
-                        }
-                        doc[service].exec[execType] = objectToAdd;
-                      }
+  .command('run', 'Add a new job')
+  .help((args) => {
+    Log('This command reads .choreo.yml to add a new job');
+  })
+  .action((args, callback) => {
+    try {
+      const fileStats = fs.statSync(`${process.cwd()}/.choreo.yml`);
+      try {
+        const doc = yaml.load(fs.readFileSync(`${process.cwd()}/.choreo.yml`, 'utf-8'));
+        for (let service of Object.keys(doc)) {
+          if (service !== 'job' && service !== 'nodes') {
+            if (typeof doc[service].payload === 'object') {
+              const objectToAdd = {};
+              for (const filepath of doc[service].payload) {
+                const filename = path.basename(filepath);
+                objectToAdd[filename] = fs.readFileSync(filepath, 'utf-8');
+              }
+              doc[service].payload = objectToAdd;
+            }
+            if (typeof doc[service].exec !== 'undefined') {
+              for (const execType of Object.keys(doc[service].exec)) {
+                if (execType !== 'bash') {
+                  if (typeof doc[service].exec[execType] === 'object') {
+                    const objectToAdd = {};
+                    for (const filepath of doc[service].exec[execType]) {
+                      const filename = path.basename(filepath);
+                      const filedata = fs.readFileSync(filepath);
+                      objectToAdd[filename] = new Buffer(filedata).toString('base64');
                     }
+                    doc[service].exec[execType] = objectToAdd;
                   }
-                } else {
-                  Log(`Error => no 'exec' specified for service: ${service}`);
-                  return null;
                 }
               }
+            } else {
+              Log(`Error => no 'exec' specified for service: ${service}`);
+              return null;
             }
-
-            if (typeof doc.nodes === 'undefined') {
-              doc.nodes = ['local'];
-            }
-
-            for (const node of doc.nodes) {
-              request
-                .post(`http://${node === 'local' ? '0.0.0.0' : node}:6003/api/saveworker`)
-                .send(doc)
-                .set('Content-Type', 'application/json')
-                .set('Accept', 'application/json')
-                .end((err, res) => {
-                  if (err) {
-                    Log(`Error occured at node: ${node}, Error => ${err}`);
-                  }
-                  if (JSON.parse(res.text).err === true) {
-                    Log(`Error occured at node: ${node}, Error => ${JSON.parse(res.text).message}`);
-                  } else {
-                    Log(chalk.green(`Job added to node: ${node}`));
-                  }
-                });
-            }
-
-          } catch (err) {
-            Log(err.message);
-            Log('Unable to parse .choreo.yml');
           }
-        } catch (err) {
-          Log('file not found: .choreo.yml');
         }
-      });
+
+        if (typeof doc.nodes === 'undefined') {
+          doc.nodes = ['local'];
+        }
+
+        for (const node of doc.nodes) {
+          request
+            .post(`http://${node === 'local' ? '0.0.0.0' : node}:6003/api/saveworker`)
+            .send(doc)
+            .set('Content-Type', 'application/json')
+            .set('Accept', 'application/json')
+            .end((err, res) => {
+              if (err) {
+                Log(`Error occured at node: ${node}, Error => ${err}`);
+              }
+              if (JSON.parse(res.text).err === true) {
+                Log(`Error occured at node: ${node}, Error => ${JSON.parse(res.text).message}`);
+              } else {
+                Log(chalk.green(`Job added to node: ${node}`));
+              }
+            });
+        }
+
+      } catch (err) {
+        Log(err.message);
+        Log('Unable to parse .choreo.yml');
+      }
+    } catch (err) {
+      Log('file not found: .choreo.yml');
+    }
+  });
 
