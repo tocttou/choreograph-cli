@@ -228,3 +228,65 @@ vcl
     }
   });
 
+vcl
+  .command('list', 'Lists all the running jobs and their services')
+  .action(function(args) {
+    this.prompt({
+      type: 'input',
+      name: 'node',
+      message: 'Enter the node IP (local for local): ',
+    }, (result) => {
+      request
+        .get(`http://${result.node === 'local' ? '0.0.0.0' : result.node}:6003/api/getworkers`)
+        .set('Accept', 'application/json')
+        .end((err, res) => {
+          if (err) {
+            Log(`Error occured at node: ${result.node}, Error => ${err}`);
+          }
+          if (JSON.parse(res.text).err === true) {
+            Log(`Error occured at node: ${result.node}, Error => ${JSON.parse(res.text).message}`);
+          } else {
+            for (const job of Object.keys(JSON.parse(res.text))) {
+              let services = '';
+              JSON.parse(res.text)[job].map((value) => services += `${value},`);
+              services = services.slice(0, services.length - 1);
+              Log(chalk.green(`${job} => ${services}`));
+            }
+          }
+        });
+    });
+  });
+
+vcl
+  .command('stop', 'Stop a job')
+  .action(function(args) {
+    this.prompt({
+      type: 'input',
+      name: 'node',
+      message: 'Enter the node IP (local for local): '
+    }, (result) => {
+      const node = result.node;
+      this.prompt({
+        type: 'input',
+        name: 'jobname',
+        message: 'Enter the job name to stop: '
+      }, (result) => {
+        request
+          .post(`http://${node === 'local' ? '0.0.0.0' : node}:6003/api/removeworker`)
+          .send({ job: result.jobname })
+          .set('Content-Type', 'application/json')
+          .set('Accept', 'application/json')
+          .end((err, res) => {
+            if (err) {
+              Log(`Error occured at node: ${node}, Error => ${err}`);
+            }
+            if (JSON.parse(res.text).err === true) {
+              Log(`Error occured at node: ${node}, Error => ${JSON.parse(res.text).message}`);
+            } else {
+              Log(chalk.green(`Removed job: ${result.jobname}`));
+            }
+          });
+      });
+    });
+  });
+
