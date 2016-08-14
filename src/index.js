@@ -1,5 +1,8 @@
-import vorpal from 'vorpal';
-import request from 'superagent';
+#!/usr/bin/env node
+
+
+const vorpal = require('vorpal');
+const request = require('superagent');
 
 const yaml = require('js-yaml');
 const Docker = require('dockerode');
