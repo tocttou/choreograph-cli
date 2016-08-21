@@ -7,7 +7,7 @@ var _dashboard = require('./dashboard');
 
 var dotenv = require('dotenv');
 var fs = require('fs');
-var envConfig = dotenv.parse(fs.readFileSync('.env'));
+var envConfig = dotenv.parse(fs.readFileSync(__dirname + '/.env'));
 var _iteratorNormalCompletion = true;
 var _didIteratorError = false;
 var _iteratorError = undefined;

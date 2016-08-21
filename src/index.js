@@ -2,7 +2,7 @@
 
 const dotenv = require('dotenv');
 const fs = require('fs');
-const envConfig = dotenv.parse(fs.readFileSync('.env'));
+const envConfig = dotenv.parse(fs.readFileSync(`${__dirname}/.env`));
 for (let k of Object.keys(envConfig)) {
   process.env[k] = envConfig[k];
 }

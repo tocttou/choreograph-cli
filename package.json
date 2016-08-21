@@ -1,13 +1,13 @@
 {
   "name": "choreograph",
-  "version": "1.0.1",
+  "version": "1.0.5",
   "description": "An OSS tool to orchestrate docker based workers. Comes with a web-UI and an API.",
   "main": "dist/bundle.js",
   "bin": {
     "choreo": "dist/bundle.js"
   },
   "scripts": {
-    "build": "npm-run-all lint:build clean-dist && node_modules/.bin/babel src/dashboard.js --out-file dist/dashboard.js && node_modules/.bin/babel src/index.js --out-file dist/bundle.js",
+    "build": "npm-run-all lint:build clean-dist && cp .env dist/ && node_modules/.bin/babel src/dashboard.js --out-file dist/dashboard.js && node_modules/.bin/babel src/index.js --out-file dist/bundle.js",
     "dev": "npm-run-all lint && babel-node src/index.js",
     "start": "node dist/bundle.js",
     "lint": "eslint src",
