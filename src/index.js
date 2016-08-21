@@ -1,5 +1,11 @@
 #!/usr/bin/env node
 
+const dotenv = require('dotenv');
+const fs = require('fs');
+const envConfig = dotenv.parse(fs.readFileSync('.env'));
+for (let k of Object.keys(envConfig)) {
+  process.env[k] = envConfig[k];
+}
 
 const vorpal = require('vorpal');
 const request = require('superagent');
@@ -7,13 +13,17 @@ const request = require('superagent');
 const yaml = require('js-yaml');
 const Docker = require('dockerode');
 const byline = require('byline');
-const fs = require('fs');
 
 const vcl = vorpal();
 const chalk = vorpal().chalk;
+let io = require('socket.io-client');
 const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 const path = require('path');
 const Log = console.log;
+
+import { makeDashboard, addLogData, addTimedOutContainerData,
+  addLiveContainerData, addResourceUsageData, setStatus,
+  removeLiveContainerData, addWebhookErrorData } from './dashboard';
 
 vcl
   .delimiter(chalk.cyan('choreo$'))
@@ -289,6 +299,69 @@ vcl
               Log(chalk.green(`Removed job: ${result.jobname}`));
             }
           });
+      });
+    });
+  });
+
+
+vcl
+  .command('monitor', 'Displays a dashboard for the job')
+  .action(function(args) {
+    this.prompt({
+      type: 'input',
+      name: 'node',
+      message: 'Enter the node IP (local for local): '
+    }, (result) => {
+      const node = result.node;
+      this.prompt({
+        type: 'input',
+        name: 'jobname',
+        message: 'Enter the job name to monitor: '
+      }, (result) => {
+        const jobname = result.jobname;
+        const socket = io.connect(`http://${node === 'local' ? '0.0.0.0' : node}:6003`, { reconnect: true });
+        makeDashboard(node, jobname, () => {
+          socket.emit('checkstatus', { jobname });
+          socket.on('runstatus', (data) => {
+            setStatus(data.status);
+          });
+          socket.on('inputStream', (data) => {
+            if (data.jobname === jobname) {
+              addLogData(`[${data.service}]: ${data.stream}`);
+            }
+          });
+          socket.on('usagestats', (data) => {
+            let currentDataObject = new Date();
+            let currentHours = currentDataObject.getHours();
+            let currentMinutes = currentDataObject.getMinutes();
+            let currentTime = `${currentHours}:${currentMinutes}`;
+            let dataToPut = [
+              { x: currentTime, y: Math.round(data[0] * 100) },
+              { x: currentTime, y: Math.round(data[1] * 100) }
+            ];
+            addResourceUsageData(dataToPut);
+          });
+          socket.on('containeradded', (data) => {
+            if (data.jobname === jobname) {
+              addLiveContainerData([data.containerid.slice(0, 12), data.service]);
+            }
+          });
+
+          socket.on('containerexited', (data) => {
+            removeLiveContainerData([data.containerid.slice(0, 12), data.service]);
+          });
+
+          socket.on('containertimedout', (data) => {
+            if (data.jobname === jobname) {
+              addTimedOutContainerData([data.containerid.slice(0, 12), data.service]);
+            }
+          });
+          socket.on('webhookerror', (data) => {
+            if (data.jobname === jobname) {
+              addWebhookErrorData([data.service, data.type, data.errurl]);
+            }
+          });
+        });
       });
     });
   });
