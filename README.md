@@ -1,4 +1,4 @@
-# choreograph-cli
+# choreograph-cli [Walmart Labs hackathon submission]
 An OSS tool to orchestrate docker based workers. Comes with a terminal UI and an http API.
 
 ## Walmart Labs Hackathon submission
