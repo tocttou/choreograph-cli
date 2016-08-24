@@ -27,6 +27,14 @@ Files used in the demo are given here.
 3. `npm i -g choreograph`
 4. Run the command: `choreo` to enter choreograph-cli shell.
 
+**Note: Make sure the user deploying this application is in the "docker" group. That is, the user can use docker without sudo access.**
+
+> sudo groupadd docker
+
+> sudo usermod -aG docker $USER
+
+Then logout and log back in.
+
 *For initial setup, run the command, `setup` after enter choreograph-cli shell.*
 
 *This setup should be done on each node that is to be used.*
