@@ -23,9 +23,10 @@ Files used in the demo are given here.
 ## Setup Instructions
 
 1. Install [docker](https://docs.docker.com/engine/installation/)
-2. Install [nodejs, npm](https://github.com/creationix/nvm)
-3. `npm i -g choreograph`
-4. Run the command: `choreo` to enter choreograph-cli shell.
+2. Make sure your $USER is in `docker` group: `sudo groupadd docker` then `sudo usermod -aG docker $USER` then logout and login
+3. Install [nodejs, npm](https://github.com/creationix/nvm)
+4. `npm i -g choreograph`
+5. Run the command: `choreo` to enter choreograph-cli shell.
 
 **Note: Make sure the user deploying this application is in the "docker" group. That is, the user can use docker without sudo access.**
 
