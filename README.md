@@ -1,3 +1,5 @@
+THIS RESPOSITORY IS ONLY FOR DEMONSTRATION. THE PROJECT IS DEAD. PLEASE DO NOT USE.
+
 # choreograph-cli [Walmart Labs hackathon submission]
 An OSS tool to orchestrate docker based workers. Comes with a terminal UI and an http API.
 
